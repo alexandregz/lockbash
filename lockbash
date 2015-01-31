@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # lockbash v1.0
 # Alexandre Espinosa Menor <aemenor@gmail.com>
-# GPL2 License
+#
 
 # You can change it if you want
 LOCK_FILE = ENV['HOME']+'/.lockbash'
