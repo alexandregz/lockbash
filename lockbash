@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # lockbash v1.0
 # Alexandre Espinosa Menor <aemenor@gmail.com>
-#
+# GPL2 License
+
+require "shellwords"
 
 # You can change it if you want
 LOCK_FILE = ENV['HOME']+'/.lockbash'
@@ -9,18 +11,27 @@ LOCK_FILE = ENV['HOME']+'/.lockbash'
 # only bash
 SH_CONFIG_FILE = ENV['HOME']+'/.bash_profile'
 
+#
 def existsConfigLockIntoSh(strToSh)
     IO.read(SH_CONFIG_FILE).include?(strToSh)
 end
 
 def showUsageAndExit()
-  puts "Usage: #{$0} (to PATH_TO_DIR|remove|show)"
+  puts "Usage: #{$0} (to PATH_TO_DIR|remove|show)" #|go)"
   exit 0
 end
 
+#def checkTermProgram()
+#  if `echo $TERM_PROGRAM`.eql?("Apple_Terminal\n")
+#    return "Terminal.app"
+#  end
+#
+#  return "iTerm.app"
+#end
+
 
 #
-options = ['to', 'remove', 'show']
+options = ['to', 'remove', 'show'] #, 'go']
 command=ARGV[0]
 dir=ARGV[1]
 
@@ -34,19 +45,24 @@ strToSh = DATA.read.gsub("#LOCK_FILE#", LOCK_FILE)
 # commands
 if command.eql?('to')
   begin
-    dir_realpath = File.realpath(dir)
+    dir_realpath = File.realpath(dir).shellescape
   rescue
     puts "Incorrect directory"
     exit 0
   end
-    
+
   File.open(SH_CONFIG_FILE, 'ab') { |f| f.write(strToSh) } if !existsConfigLockIntoSh(strToSh)
   File.open(LOCK_FILE, 'wb') { |f| f.write(dir_realpath) }
 
   puts "Locked to #{dir_realpath}"
+
+#elsif command.eql?('go')
+
+#    puts (!File.exists?(LOCK_FILE) ? "No locked" : File.open(LOCK_FILE) {|f| `open -a #{checkTermProgram} #{f.readline}`} )
 elsif command.eql?('show')
 
-    puts (!File.exists?(LOCK_FILE) ? "No locked" : %x(echo "Locked to $(/bin/cat #{LOCK_FILE})") )
+    puts (!File.exists?(LOCK_FILE) ? "No locked" : File.open(LOCK_FILE) {|f| "Locked to " +f.readline} )
+
 elsif command.eql?('remove')
     restoreStr = File.read(SH_CONFIG_FILE).sub(strToSh, "")
     File.open(SH_CONFIG_FILE, "w") {|file| file.puts restoreStr } if existsConfigLockIntoSh(strToSh)
@@ -58,15 +74,15 @@ end
 
 
 __END__
-# lock bash 
+# lock bash
 LOCK_FILE=#LOCK_FILE#
 
 if [ -f $LOCK_FILE ]; then
-	DIR_TO_LOCK=$(cat $LOCK_FILE)
-	eval REALPATH=$DIR_TO_LOCK  # to expand "~/dir", for example 
+        DIR_TO_LOCK=$(cat $LOCK_FILE)
+        eval REALPATH=$DIR_TO_LOCK  # to expand "~/dir", for example
 
-        if [ -d $REALPATH ]; then
-                cd $REALPATH
+        if [ -d "$REALPATH" ]; then
+                cd "$REALPATH"
                 echo "Locked to $DIR_TO_LOCK"
         fi
 fi
