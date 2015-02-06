@@ -75,14 +75,14 @@ end
 
 __END__
 # lock bash
-LOCK_FILE=#LOCK_FILE#
+LOCKBASH_FILE=#LOCK_FILE#
 
-if [ -f $LOCK_FILE ]; then
-        DIR_TO_LOCK=$(cat $LOCK_FILE)
-        eval REALPATH=$DIR_TO_LOCK  # to expand "~/dir", for example
+if [ -f $LOCKBASH_FILE ]; then
+        LOCKBASH_DIR=$(cat $LOCKBASH_FILE)
+        eval LOCKBASH_REALPATH=$LOCKBASH_DIR   # to expand "~/dir", for example
 
-        if [ -d "$REALPATH" ]; then
-                cd "$REALPATH"
-                echo "Locked to $DIR_TO_LOCK"
+        if [ -d "$LOCKBASH_REALPATH" ]; then
+                cd "$LOCKBASH_REALPATH"
+                echo "Locked to $LOCKBASH_DIR"
         fi
 fi
